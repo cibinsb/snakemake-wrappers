@@ -4,10 +4,13 @@ __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 import os
+
+import snakemake
 from snakemake.shell import shell
 
 revision = snakemake.params.get("revision")
 profile = snakemake.params.get("profile", [])
+configs = snakemake.params.get("config", [])
 extra = snakemake.params.get("extra", "")
 if isinstance(profile, str):
     profile = [profile]
@@ -18,6 +21,9 @@ if revision:
     args += ["-revision", revision]
 if profile:
     args += ["-profile", ",".join(profile)]
+if configs:
+    for config in configs:
+        args.extend(["-config", config])
 print(args)
 
 # TODO pass threads in case of single job
