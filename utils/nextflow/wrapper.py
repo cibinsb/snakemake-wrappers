@@ -5,7 +5,6 @@ __license__ = "MIT"
 
 import os
 
-import snakemake
 from snakemake.shell import shell
 
 revision = snakemake.params.get("revision")
