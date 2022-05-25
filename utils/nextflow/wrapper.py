@@ -41,6 +41,7 @@ for name, value in snakemake.params.items():
         name != "pipeline"
         and name != "revision"
         and name != "profile"
+        and name != "config"
         and name != "extra"
     ):
         add_parameter(name, value)
