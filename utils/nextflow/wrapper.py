@@ -55,9 +55,13 @@ work_dir = os.getcwd()
 run_dir = PurePath(work_dir)
 nfl_tmp_work = os.getenv("TMP_DIR")
 nf_work = shlex.quote(str(Path(nfl_tmp_work) / run_dir.parent.name / run_dir.name / Path("work")))
-run_command = f"set -ue; umask 0077; mkdir -p {nf_work};\
+
+# setting NXF_WORK variable on the shell
+run_command = 'export NXF_WORK="{nf_work}"; '
+# Adding symbolic link to Nextflow work directory 
+run_command += 'set -ue; umask 0077; mkdir -p {nf_work}; \
                 mkdir -p {work_dir}; \
-                ln -s {nf_work} {work_dir}"
+                ln -s {nf_work} {work_dir}'
 shell(
     """
     {run_command} | nextflow run {pipeline} {args} {extra} {log}
