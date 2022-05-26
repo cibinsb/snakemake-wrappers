@@ -11,6 +11,7 @@ from snakemake.shell import shell
 revision = snakemake.params.get("revision")
 profile = snakemake.params.get("profile", [])
 configs = snakemake.params.get("config", [])
+with_tower = snakemake.params.get("with_tower")
 extra = snakemake.params.get("extra", "")
 if isinstance(profile, str):
     profile = [profile]
@@ -24,6 +25,8 @@ if profile:
 if configs:
     for config in configs:
         args.extend(["-config", config])
+if with_tower:
+    args += ["-with-tower", with_tower]
 print(args)
 
 # TODO pass threads in case of single job
@@ -43,6 +46,7 @@ for name, value in snakemake.params.items():
         and name != "revision"
         and name != "profile"
         and name != "config"
+        and name != "with_tower"
         and name != "extra"
     ):
         add_parameter(name, value)
