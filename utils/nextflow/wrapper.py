@@ -4,7 +4,8 @@ __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 import os
-
+import shlex
+from pathlib import Path, PurePath
 from snakemake.shell import shell
 
 revision = snakemake.params.get("revision")
@@ -50,4 +51,15 @@ log = snakemake.log_fmt_shell(stdout=False, stderr=True)
 args = " ".join(args)
 pipeline = snakemake.params.pipeline
 
-shell("nextflow run {pipeline} {args} {extra} {log}")
+work_dir = os.getcwd()
+run_dir = PurePath(work_dir)
+nfl_tmp_work = os.getenv("TMP_DIR")
+nf_work = shlex.quote(str(Path(nfl_tmp_work) / run_dir.parent.name / run_dir.name / Path("work")))
+run_command = f"set -ue; umask 0077; mkdir -p {nf_work}"
+print(f"Executing creation of NXF_WORK from command: {run_command}")
+shell(
+    """
+    set -ue; umask 0077; mkdir -p {nf_work};
+    nextflow run {pipeline} {args} {extra} {log}
+    """
+)
