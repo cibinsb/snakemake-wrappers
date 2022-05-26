@@ -55,11 +55,11 @@ work_dir = os.getcwd()
 run_dir = PurePath(work_dir)
 nfl_tmp_work = os.getenv("TMP_DIR")
 nf_work = shlex.quote(str(Path(nfl_tmp_work) / run_dir.parent.name / run_dir.name / Path("work")))
-run_command = f"set -ue; umask 0077; mkdir -p {nf_work}"
-print(f"Executing creation of NXF_WORK from command: {run_command}")
+run_command = f"set -ue; umask 0077; mkdir -p {nf_work};\
+                mkdir -p {shlex.quote(str(work_dir))}; \
+                ln -s {shlex.quote(nf_work)} {shlex.quote(str(work_dir))}"
 shell(
     """
-    set -ue; umask 0077; mkdir -p {nf_work};
-    nextflow run {pipeline} {args} {extra} {log}
+    {run_command} | nextflow run {pipeline} {args} {extra} {log}
     """
 )
