@@ -68,6 +68,6 @@ run_command += f'set -ue; umask 0077; mkdir -p {nf_work}; \
                 ln -s {nf_work} {work_dir}'
 shell(
     """
-    {run_command} | nextflow run {pipeline} {args} {extra} {log}
+    {run_command}; nextflow run {pipeline} {args} {extra} {log}
     """
 )
