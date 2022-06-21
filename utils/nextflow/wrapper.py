@@ -40,15 +40,9 @@ for name, files in snakemake.input.items():
         # TODO check how multiple input files under a single arg are usually passed to nextflow
         files = ",".join(files)
     add_parameter(name, files)
+single_dash_params = ["pipeline", "revision", "profile", "config", "with_tower", "extra"]
 for name, value in snakemake.params.items():
-    if (
-        name != "pipeline"
-        and name != "revision"
-        and name != "profile"
-        and name != "config"
-        and name != "with_tower"
-        and name != "extra"
-    ):
+    if name not in single_dash_params:
         add_parameter(name, value)
 
 log = snakemake.log_fmt_shell(stdout=False, stderr=True)
@@ -65,7 +59,7 @@ run_command = f'export NXF_WORK="{nf_work}"; '
 # Adding symbolic link to Nextflow work directory
 run_command += f'set -ue; umask 0077; mkdir -p {nf_work}; \
                 mkdir -p {work_dir}; \
-                ln -s {nf_work} {work_dir}'
+                ln -sf {nf_work} {work_dir}'
 shell(
     """
     {run_command} | nextflow run {pipeline} {args} {extra} {log}
