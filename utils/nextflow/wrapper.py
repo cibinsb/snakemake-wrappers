@@ -10,7 +10,7 @@ from snakemake.shell import shell
 
 revision = snakemake.params.get("revision")
 profile = snakemake.params.get("profile", [])
-configs = snakemake.params.get("config", [])
+configs = snakemake.input.get("config", [])
 with_tower = snakemake.params.get("with_tower")
 extra = snakemake.params.get("extra", "")
 if isinstance(profile, str):
@@ -36,11 +36,12 @@ print(args)
 add_parameter = lambda name, value: args.append("--{} {}".format(name, value))
 
 for name, files in snakemake.input.items():
-    if isinstance(files, list):
-        # TODO check how multiple input files under a single arg are usually passed to nextflow
-        files = ",".join(files)
-    add_parameter(name, files)
-single_dash_params = ["pipeline", "revision", "profile", "config", "with_tower", "extra"]
+    if name is not "config":
+        if isinstance(files, list):
+            # TODO check how multiple input files under a single arg are usually passed to nextflow
+            files = ",".join(files)
+        add_parameter(name, files)
+single_dash_params = ["pipeline", "revision", "profile", "with_tower", "extra"]
 for name, value in snakemake.params.items():
     if name not in single_dash_params:
         add_parameter(name, value)
