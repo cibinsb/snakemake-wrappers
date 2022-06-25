@@ -36,7 +36,7 @@ print(args)
 add_parameter = lambda name, value: args.append("--{} {}".format(name, value))
 
 for name, files in snakemake.input.items():
-    if name is not "config":
+    if name != "config":
         if isinstance(files, list):
             # TODO check how multiple input files under a single arg are usually passed to nextflow
             files = ",".join(files)
