@@ -8,6 +8,7 @@ import shlex
 from pathlib import Path, PurePath
 from snakemake.shell import shell
 
+nf_version = snakemake.params.get("nf_version", "22.04.0-5697")
 revision = snakemake.params.get("revision")
 profile = snakemake.params.get("profile", [])
 configs = snakemake.input.get("config", [])
@@ -41,7 +42,7 @@ for name, files in snakemake.input.items():
             # TODO check how multiple input files under a single arg are usually passed to nextflow
             files = ",".join(files)
         add_parameter(name, files)
-single_dash_params = ["pipeline", "revision", "profile", "with_tower", "extra"]
+single_dash_params = ["pipeline", "nf_version", "revision", "profile", "with_tower", "extra"]
 for name, value in snakemake.params.items():
     if name not in single_dash_params:
         add_parameter(name, value)
@@ -66,6 +67,9 @@ shell(
     mkdir -p "{work_dir}"
     ln -sf {nf_work} {work_dir}
     # Run nextflow
-    nextflow run {pipeline} {args} {extra} {log}
+    #Same as "module load nextflow/{nf_version}", in case "module" is not available
+    TOL_NEXTFLOW_DIR=/software/treeoflife/custom-installs/bin/nextflow/{nf_version}
+    env NXF_JAVA_HOME=$TOL_NEXTFLOW_DIR/jdk-11 \
+    $TOL_NEXTFLOW_DIR/nextflow/nextflow run {pipeline} {args} {extra} {log}
     """
 )
