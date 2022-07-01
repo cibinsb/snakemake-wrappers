@@ -8,6 +8,7 @@ import shlex
 from pathlib import Path, PurePath
 from snakemake.shell import shell
 
+nf_version = snakemake.params.get("nf_version", "22.04.0-5697")
 revision = snakemake.params.get("revision")
 profile = snakemake.params.get("profile", [])
 configs = snakemake.input.get("config", [])
@@ -36,12 +37,12 @@ print(args)
 add_parameter = lambda name, value: args.append("--{} {}".format(name, value))
 
 for name, files in snakemake.input.items():
-    if name is not "config":
+    if name != "config":
         if isinstance(files, list):
             # TODO check how multiple input files under a single arg are usually passed to nextflow
             files = ",".join(files)
         add_parameter(name, files)
-single_dash_params = ["pipeline", "revision", "profile", "with_tower", "extra"]
+single_dash_params = ["pipeline", "nf_version", "revision", "profile", "with_tower", "extra"]
 for name, value in snakemake.params.items():
     if name not in single_dash_params:
         add_parameter(name, value)
@@ -55,14 +56,20 @@ run_dir = PurePath(work_dir)
 nfl_tmp_work = os.getenv("TMP_DIR")
 nf_work = shlex.quote(str(Path(nfl_tmp_work) / run_dir.parent.name / run_dir.name / Path("work")))
 
-# setting NXF_WORK variable on the shell
-run_command = f'export NXF_WORK="{nf_work}"; '
-# Adding symbolic link to Nextflow work directory
-run_command += f'set -ue; umask 0077; mkdir -p {nf_work}; \
-                mkdir -p {work_dir}; \
-                ln -sf {nf_work} {work_dir}'
 shell(
     """
-    {run_command} | nextflow run {pipeline} {args} {extra} {log}
+    set -ue
+    # setting NXF_WORK variable on the shell
+    export NXF_WORK="{nf_work}"
+    # Adding symbolic link to Nextflow work directory
+    umask 0077
+    mkdir -p "{nf_work}"
+    mkdir -p "{work_dir}"
+    ln -sf {nf_work} {work_dir}
+    # Run nextflow
+    #Same as "module load nextflow/{nf_version}", in case "module" is not available
+    TOL_NEXTFLOW_DIR=/software/treeoflife/custom-installs/bin/nextflow/{nf_version}
+    env NXF_JAVA_HOME=$TOL_NEXTFLOW_DIR/jdk-11 \
+    $TOL_NEXTFLOW_DIR/nextflow/nextflow run {pipeline} {args} {extra} {log}
     """
 )
