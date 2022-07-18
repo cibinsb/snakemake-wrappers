@@ -17,7 +17,7 @@ extra = snakemake.params.get("extra", "")
 if isinstance(profile, str):
     profile = [profile]
 
-args = []
+args = ["-resume "]
 
 if revision:
     args += ["-revision", revision]
@@ -37,11 +37,10 @@ print(args)
 add_parameter = lambda name, value: args.append("--{} {}".format(name, value))
 
 for name, files in snakemake.input.items():
-    if name != "config":
-        if isinstance(files, list):
-            # TODO check how multiple input files under a single arg are usually passed to nextflow
-            files = ",".join(files)
-        add_parameter(name, files)
+    if isinstance(files, list):
+        # TODO check how multiple input files under a single arg are usually passed to nextflow
+        files = ",".join(files)
+    add_parameter(name, files)
 single_dash_params = ["pipeline", "nf_version", "revision", "profile", "with_tower", "extra"]
 for name, value in snakemake.params.items():
     if name not in single_dash_params:
