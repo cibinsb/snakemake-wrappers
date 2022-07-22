@@ -17,7 +17,7 @@ extra = snakemake.params.get("extra", "")
 if isinstance(profile, str):
     profile = [profile]
 
-args = ["-resume "]
+args = []
 
 if revision:
     args += ["-revision", revision]
