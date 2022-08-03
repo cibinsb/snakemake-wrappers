@@ -4,7 +4,7 @@ __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 import os
-import re
+import uuid
 import shlex
 from pathlib import Path, PurePath
 from snakemake.shell import shell
@@ -15,11 +15,12 @@ profile = snakemake.params.get("profile", [])
 configs = snakemake.input.get("config", [])
 with_tower = snakemake.params.get("with_tower")
 extra = snakemake.params.get("extra", "")
-custom_work_dir = None
+
+# placeholder value for custom work dir path
+custom_work_dir = str(uuid.uuid4())
 for output_file in str(snakemake.output).split():
     custom_work_dir = output_file.replace(".done", "")
-    if custom_work_dir:
-        break
+    break
 if isinstance(profile, str):
     profile = [profile]
 
@@ -56,12 +57,11 @@ log = snakemake.log_fmt_shell(stdout=True, stderr=True)
 args = " ".join(args)
 pipeline = snakemake.params.pipeline
 
-work_dir = str(Path(os.getcwd()) / Path("work") / Path(custom_work_dir))
+work_dir = str(Path(os.getcwd()) / Path("work"))
 run_dir = PurePath(os.getcwd())
 nfl_tmp_work = os.getenv("TMP_DIR")
 nf_work = shlex.quote(str(Path(nfl_tmp_work) / run_dir.parent.name
                           / run_dir.name / Path("work") / Path(custom_work_dir)))
-
 shell(
     """
     set -ue
