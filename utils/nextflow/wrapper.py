@@ -15,6 +15,8 @@ profile = snakemake.params.get("profile", [])
 configs = snakemake.input.get("config", [])
 with_tower = snakemake.params.get("with_tower")
 extra = snakemake.params.get("extra", "")
+work_dir = snakemake.params.get("w", None)
+resume = snakemake.params.get("resume", False)
 
 # placeholder value for custom work dir path
 custom_work_dir = str(uuid.uuid4())
@@ -35,6 +37,10 @@ if configs:
         args.extend(["-config", config])
 if with_tower:
     args += ["-with-tower", with_tower]
+if work_dir:
+    args += ["-w", work_dir]
+if resume:
+    args += ["-resume"]
 print(args)
 
 # TODO pass threads in case of single job
@@ -48,7 +54,7 @@ for name, files in snakemake.input.items():
         # TODO check how multiple input files under a single arg are usually passed to nextflow
         files = ",".join(files)
     add_parameter(name, files)
-single_dash_params = ["pipeline", "nf_version", "revision", "profile", "with_tower", "extra"]
+single_dash_params = ["pipeline", "nf_version", "revision", "profile", "with_tower", "extra", "w", "resume"]
 for name, value in snakemake.params.items():
     if name not in single_dash_params:
         add_parameter(name, value)
